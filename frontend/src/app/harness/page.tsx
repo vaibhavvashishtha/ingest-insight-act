@@ -175,7 +175,7 @@ function JsonInspector({
                 <div className="flex items-center justify-between bg-gray-800 px-2 py-1">
                   <span>
                     <span className="text-yellow-400">{entry.method}</span>{" "}
-                    <span className="text-gray-300">{entry.url.replace("http://localhost:8000/api/v1", "")}</span>{" "}
+                    <span className="text-gray-300">{entry.url.replace(/^https?:\/\/[^/]+(\/api\/v1)?/, "")}</span>{" "}
                     <span className={entry.status < 300 ? "text-green-400" : "text-red-400"}>
                       {entry.status}
                     </span>{" "}
@@ -438,7 +438,10 @@ export default function HarnessPage() {
     try {
       setDevTenantId(tenantInput);
       dispatch({ type: "SET_TENANT_ID", id: tenantInput });
-      const res = await fetch("http://localhost:8000/health", {
+      // Strip /api/v1 from the configured base to hit /health on the same origin
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+      const healthUrl = apiBase.replace(/\/api\/v1\/?$/, "") + "/health";
+      const res = await fetch(healthUrl, {
         headers: { "X-Dev-Tenant-Id": tenantInput },
       });
       if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
