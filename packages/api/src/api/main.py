@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
+from api.limits import limiter
 from api.routers import campaigns, dev, ingestion, insights, query, reports, sources
+from core.config import settings
 
 app = FastAPI(
     title="ingest-insight-act API",
@@ -9,9 +13,15 @@ app = FastAPI(
     description="Multi-tenant marketing ETL, insights, and actions platform",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Parse comma-separated origin list — strip whitespace, drop empties
+_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

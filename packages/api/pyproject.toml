@@ -10,6 +10,7 @@ dependencies = [
     "uvicorn[standard]>=0.29",
     "python-jose[cryptography]>=3.3",
     "python-multipart>=0.0.9",
+    "slowapi>=0.1.9",
 ]
 
 [build-system]

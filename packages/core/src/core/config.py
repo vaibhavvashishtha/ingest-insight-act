@@ -22,5 +22,12 @@ class Settings(BaseSettings):
     dev_tenant_id: str | None = None
     mock_claude: bool = False
 
+    # Comma-separated list of allowed CORS origins. In dev, defaults to localhost:3000.
+    cors_origins: str = "http://localhost:3000"
+
+    # Per-IP rate limits for sensitive endpoints (slowapi format)
+    rate_limit_seed: str = "5/hour"
+    rate_limit_llm: str = "20/hour"
+
 
 settings = Settings()

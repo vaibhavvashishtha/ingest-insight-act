@@ -3,9 +3,10 @@ import random
 import uuid
 from datetime import date, timedelta
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 from api.dependencies import TenantId
+from api.limits import limiter
 from core.config import settings
 from core.db import get_session
 from core.models import DataSource, DimCampaign, DimChannel, FactPerformance
@@ -14,7 +15,8 @@ router = APIRouter(prefix="/dev", tags=["dev"])
 
 
 @router.post("/seed")
-async def seed_mock_data(tenant_id: TenantId):
+@limiter.limit(settings.rate_limit_seed)
+async def seed_mock_data(request: Request, tenant_id: TenantId):
     """
     Insert a stub data source + 30 days of fake fact_performance rows.
     Lets the harness skip steps 2-4 (which require real GA4 credentials) and exercise steps 5-8.

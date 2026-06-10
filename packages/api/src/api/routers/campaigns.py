@@ -1,11 +1,13 @@
 import json
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from jinja2 import BaseLoader, Environment
 from sqlalchemy import select
 
 from api.dependencies import TenantId
+from api.limits import limiter
+from core.config import settings
 from core.db import get_session
 from core.models import CampaignPlan
 from core.registry import load_all_content_models
@@ -26,7 +28,8 @@ _jinja_env = Environment(loader=BaseLoader(), autoescape=False)
 
 
 @router.post("/plans", response_model=CampaignPlanRead, status_code=201)
-async def create_campaign_plan(body: CreateCampaignPlanRequest, tenant_id: TenantId):
+@limiter.limit(settings.rate_limit_llm)
+async def create_campaign_plan(request: Request, body: CreateCampaignPlanRequest, tenant_id: TenantId):
     from core.content_models.claude_model import ClaudeContentModel
     from core.content_models.base import ContentRequest
 
@@ -69,7 +72,8 @@ async def create_campaign_plan(body: CreateCampaignPlanRequest, tenant_id: Tenan
 
 
 @router.post("/content/generate", response_model=GeneratedContentRead)
-async def generate_content(body: GenerateContentRequest, tenant_id: TenantId):
+@limiter.limit(settings.rate_limit_llm)
+async def generate_content(request: Request, body: GenerateContentRequest, tenant_id: TenantId):
     from core.content_models.claude_model import ClaudeContentModel
     from core.content_models.base import ContentRequest
 

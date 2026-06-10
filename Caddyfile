@@ -1,0 +1,35 @@
+# Caddy auto-provisions Let's Encrypt SSL for {$DOMAIN}.
+# Frontend (/) → Next.js :3000
+# API (/api/*, /health) → FastAPI :8000
+
+{$DOMAIN} {
+    encode gzip zstd
+
+    # Forward /api/* and /health to FastAPI, stripping nothing (FastAPI mounts at /api/v1)
+    @api {
+        path /api/* /health /docs /openapi.json /redoc
+    }
+    reverse_proxy @api api:8000 {
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-Host {host}
+    }
+
+    # Everything else → Next.js
+    reverse_proxy frontend:3000 {
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-Host {host}
+    }
+
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

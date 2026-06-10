@@ -1,9 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import select
 
 from api.dependencies import TenantId
+from api.limits import limiter
+from core.config import settings
 from core.db import get_session
 from core.models import Insight
 from core.registry import load_all_content_models
@@ -19,7 +21,8 @@ _prompt_store = PromptStore()
 
 
 @router.post("/generate", response_model=InsightRead, status_code=201)
-async def generate_insight(body: GenerateInsightRequest, tenant_id: TenantId):
+@limiter.limit(settings.rate_limit_llm)
+async def generate_insight(request: Request, body: GenerateInsightRequest, tenant_id: TenantId):
     from core.content_models.claude_model import ClaudeContentModel
 
     engine = InsightEngine(
