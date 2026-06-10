@@ -9,6 +9,11 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    # Use public DNS so ACME (Let's Encrypt) lookups work from inside the container.
+    # Hostinger hosts use systemd-resolved at 127.0.0.53 which is unreachable from containers.
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     ports:
       - "80:80"
       - "443:443"
@@ -43,6 +48,9 @@ services:
       context: .
       dockerfile: packages/api/Dockerfile
     restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
     env_file: .env.production
     environment:
@@ -63,6 +71,9 @@ services:
       context: .
       dockerfile: packages/etl/Dockerfile
     restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     command: ["celery", "-A", "etl.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
     env_file: .env.production
     environment:
