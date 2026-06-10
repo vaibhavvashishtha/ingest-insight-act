@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "ingest-insight-act": {
+      "command": "python",
+      "args": ["-m", "mcp_server.main"],
+      "cwd": "/Users/vaibhavvashishtha/Repositories/ingest-insight-act",
+      "env": {
+        "PYTHONPATH": "packages/core/src:packages/etl/src:packages/insights/src:packages/mcp_server/src",
+        "TENANT_ID": "YOUR-TENANT-UUID-HERE",
+        "ANTHROPIC_API_KEY": "sk-ant-...",
+        "DATABASE_URL": "postgresql+asyncpg://app_user:app_password@127.0.0.1:5433/ingest_insight_act",
+        "REDIS_URL": "redis://localhost:6379/0",
+        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key"
+      }
+    }
+  }
+}
