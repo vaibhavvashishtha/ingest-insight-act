@@ -4,13 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from api.dependencies import TenantId
-from mcp_server.tools.query_data import query_data as _query_data
+from core.queries import query_performance
 
 router = APIRouter(prefix="/query", tags=["query"])
 
 
 @router.get("/")
-async def query_performance(
+async def query_performance_route(
     tenant_id: TenantId,
     start_date: str = Query(...),
     end_date: str = Query(...),
@@ -19,7 +19,7 @@ async def query_performance(
     source_ids: Annotated[list[str] | None, Query()] = None,
     limit: int = 50,
 ):
-    return await _query_data(
+    return await query_performance(
         tenant_id=tenant_id,
         start_date=start_date,
         end_date=end_date,
