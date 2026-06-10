@@ -167,7 +167,7 @@ export const queryData = (params: {
   if (params.limit) qs.set("limit", String(params.limit));
   params.metrics?.forEach((m) => qs.append("metrics", m));
   params.source_ids?.forEach((s) => qs.append("source_ids", s));
-  return apiFetch<QueryResult>(`/query?${qs}`);
+  return apiFetch<QueryResult>(`/query/?${qs}`);
 };
 
 // ── Reports ────────────────────────────────────────────────────────────────
